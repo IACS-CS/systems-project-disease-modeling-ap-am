@@ -15,9 +15,6 @@ import { renderTable } from "../../lib/renderTable";
 let boxSize = 500; // World box size in pixels
 let maxSize = 1000; // Max number of icons we render (we can simulate big populations, but don't render them all...)
 
-/**
- * Renders a subset of the population as a list of patients with emojis indicating their infection status.
- */
 const renderPatients = (population) => {
   let amRenderingSubset = population.length > maxSize;
   const popSize = population.length;
@@ -26,10 +23,14 @@ const renderPatients = (population) => {
   }
 
   function renderEmoji(p) {
-    if (p.newlyInfected) {
+    if (p.alive && p.newlyInfected) {
       return "🤧"; // Sneezing Face for new cases
-    } else if (p.infected) {
+    } else if (p.alive && p.infected) {
       return "🤢"; // Vomiting Face for already sick
+    } else if (!p.alive) {
+      return "💀"; // Skull emoji for dead individuals
+    } else if (p.immune) {
+      return "🥳"
     } else {
       return "😀"; // Healthy person
     }
@@ -141,10 +142,59 @@ const Simulation = () => {
             {simulationParameters.infectionChance}%
           </label>
           <label>
+            Infection Chance:
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={simulationParameters.infectionChance}
+              onChange={(e) =>
+                setSimulationParameters({
+                  ...simulationParameters,
+                  infectionChance: parseFloat(e.target.value),
+                })
+              }
+            />
+            {simulationParameters.infectionChance}%
+          </label>
+          <label>
+            immunity Rate:
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={simulationParameters.immunityRate}
+              onChange={(e) =>
+                setSimulationParameters({
+                  ...simulationParameters,
+                  immunityRate: parseFloat(e.target.value),
+                })
+              }
+            />
+            {simulationParameters.immunityRate}%
+          </label>
+          <label>
+            Death Rate:
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={simulationParameters.deathRate}
+              onChange={(e) =>
+                setSimulationParameters({
+                  ...simulationParameters,
+                  deathRate: parseFloat(e.target.value),
+                })
+              }
+            />
+            {simulationParameters.deathRate}%
+          </label>
+          <label>
             Population:
             <div className="vertical-stack">
-              {/* Population uses a "square" size to allow a UI that makes it easy to slide
-          from a small population to a large one. */}
               <input
                 type="range"
                 min="3"
