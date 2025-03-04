@@ -27,6 +27,10 @@ const renderPatients = (population) => {
       return "🤧"; // Sneezing Face for new cases
     } else if (p.infected) {
       return "🤢"; // Vomiting Face for already sick
+    } else if (p.daysInfected === 0 && p.recovered) {
+      return "🥳"; // Party Face for recovered
+    } else if (p.immune) {
+      return "🦸"; // Superhero for immune individuals
     } else {
       return "😀"; // Healthy person
     }
@@ -68,19 +72,17 @@ const renderPatients = (population) => {
 
 const Simulation = () => {
   const [popSize, setPopSize] = useState(20);
-  const [population, setPopulation] = useState(
-    createPopulation(popSize * popSize)
-  );
+  const [youngRatio, setYoungRatio] = useState(50); // User controls this value (0-100)
+  const [fluSeason, setFluSeason] = useState(false); // Flu season toggle
+  const [population, setPopulation] = useState(createPopulation(popSize * popSize, youngRatio));
   const [diseaseData, setDiseaseData] = useState([]);
   const [lineToGraph, setLineToGraph] = useState("infected");
   const [autoMode, setAutoMode] = useState(false);
-  const [simulationParameters, setSimulationParameters] = useState(
-    defaultSimulationParameters
-  );
+  const [simulationParameters, setSimulationParameters] = useState(defaultSimulationParameters);
 
   // Runs a single simulation step
   const runTurn = () => {
-    let newPopulation = updatePopulation([...population], simulationParameters);
+    let newPopulation = updatePopulation([...population], fluSeason);
     setPopulation(newPopulation);
     let newStats = computeStatistics(newPopulation, diseaseData.length);
     setDiseaseData([...diseaseData, newStats]);
@@ -88,7 +90,7 @@ const Simulation = () => {
 
   // Resets the simulation
   const resetSimulation = () => {
-    setPopulation(createPopulation(popSize * popSize));
+    setPopulation(createPopulation(popSize * popSize, youngRatio));
     setDiseaseData([]);
   };
 
@@ -120,28 +122,28 @@ const Simulation = () => {
         <button onClick={resetSimulation}>Reset Simulation</button>
 
         <div>
-          {/* Add custom parameters here... */}
+          {/* Age distribution slider */}
           <label>
-            Population:
-            <div className="vertical-stack">
-              {/* Population uses a "square" size to allow a UI that makes it easy to slide
-          from a small population to a large one. */}
-              <input
-                type="range"
-                min="3"
-                max="1000"
-                value={popSize}
-                onChange={(e) => setPopSize(parseInt(e.target.value))}
-              />
-              <input
-                type="number"
-                value={Math.round(popSize * popSize)}
-                step="10"
-                onChange={(e) =>
-                  setPopSize(Math.sqrt(parseInt(e.target.value)))
-                }
-              />
-            </div>
+            Young Population Ratio: {youngRatio}%
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={youngRatio}
+              onChange={(e) => setYoungRatio(parseInt(e.target.value))}
+            />
+          </label>
+        </div>
+
+        <div>
+          {/* Flu Season Toggle */}
+          <label>
+            Flu Season:
+            <input
+              type="checkbox"
+              checked={fluSeason}
+              onChange={() => setFluSeason(!fluSeason)}
+            />
           </label>
         </div>
       </section>
