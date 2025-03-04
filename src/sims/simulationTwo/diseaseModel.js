@@ -26,19 +26,20 @@ import { shufflePopulation } from "../../lib/shufflePopulation";
 
 /**
  * Authors: 
+ * Andre, Addario
  * 
  * What we are simulating:
- * 
+ * The spread of the flu
  * What we are attempting to model from the real world:
- * 
+ * The spread of the sicknes and how fast it spreads depending on if its in season
  * What we are leaving out of our model:
- * 
+ * Death rate
  * What elements we have to add:
- * 
+ * Flu Season on and off button 
  * What parameters we will allow users to "tweak" to adjust the model:
- * 
+ * Infection chance, flu season, population, immunity, Age of population 
  * In plain language, what our model does:
- * 
+ * Our model shows the impact and distribution of the flu depending on things like if its flu seaon, age of the person, infection chance,
  */
 
 
