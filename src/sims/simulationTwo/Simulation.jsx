@@ -23,11 +23,9 @@ const renderPatients = (population) => {
   }
 
   function renderEmoji(p) {
-    if (p.newlyInfected) {
-      return "🤧"; // Sneezing Face for new cases
-    } else if (p.infected) {
-      return "🤢"; // Vomiting Face for already sick
-    } else if (p.daysInfected === 0 && p.recovered) {
+    if (p.infected) {
+      return "🤢"; // Vomiting Face for permanently sick individuals
+    } else if (p.recovered) {
       return "🥳"; // Party Face for recovered
     } else if (p.immune) {
       return "🦸"; // Superhero for immune individuals
@@ -40,8 +38,7 @@ const renderPatients = (population) => {
     if (amRenderingSubset) {
       return (
         <div className="subset-warning">
-          Only showing {maxSize} ({((maxSize * 100) / popSize).toFixed(2)}%) of{" "}
-          {popSize} patients...
+          Only showing {maxSize} ({((maxSize * 100) / popSize).toFixed(2)}%) of {popSize} patients...
         </div>
       );
     }
@@ -58,9 +55,7 @@ const renderPatients = (population) => {
           data-patient-y={p.y}
           className="patient"
           style={{
-            transform: `translate(${(p.x / 100) * boxSize}px, ${
-              (p.y / 100) * boxSize
-            }px)`,
+            transform: `translate(${(p.x / 100) * boxSize}px, ${(p.y / 100) * boxSize}px)`,
           }}
         >
           {renderEmoji(p)}
@@ -112,8 +107,7 @@ const Simulation = () => {
         </p>
 
         <p>
-          Population: {population.length}. Infected:{" "}
-          {population.filter((p) => p.infected).length}
+          Population: {population.length}. Infected: {population.filter((p) => p.infected).length}
         </p>
 
         <button onClick={runTurn}>Next Turn</button>
@@ -152,10 +146,7 @@ const Simulation = () => {
         {renderChart(diseaseData, lineToGraph, setLineToGraph, trackedStats)}
 
         <div className="world">
-          <div
-            className="population-box"
-            style={{ width: boxSize, height: boxSize }}
-          >
+          <div className="population-box" style={{ width: boxSize, height: boxSize }}>
             {renderPatients(population)}
           </div>
         </div>

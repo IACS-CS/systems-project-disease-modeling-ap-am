@@ -1,28 +1,4 @@
-
-
-/* Update this code to simulate a simple disease model! */
-
-/* For this simulation, you should model a *real world disease* based on some real information about it.
-*
-* Options are:
-* - Mononucleosis, which has an extremely long incubation period.
-*
-* - The flu: an ideal model for modeling vaccination. The flu evolves each season, so you can model
-    a new "season" of the flu by modeling what percentage of the population gets vaccinated and how
-    effective the vaccine is.
-* 
-* - An emerging pandemic: you can model a new disease (like COVID-19) which has a high infection rate.
-*    Try to model the effects of an intervention like social distancing on the spread of the disease.
-*    You can model the effects of subclinical infections (people who are infected but don't show symptoms)
-*    by having a percentage of the population be asymptomatic carriers on the spread of the disease.
-*
-* - Malaria: a disease spread by a vector (mosquitoes). You can model the effects of the mosquito population
-    (perhaps having it vary seasonally) on the spread of the disease, or attempt to model the effects of
-    interventions like bed nets or insecticides.
-*
-* For whatever illness you choose, you should include at least one citation showing what you are simulating
-* is based on real world data about a disease or a real-world intervention.
-*/
+//AI used through out this project
 
 /**
  * Authors: 
