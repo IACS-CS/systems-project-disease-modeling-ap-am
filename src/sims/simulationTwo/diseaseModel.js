@@ -1,29 +1,29 @@
-//AI used through out this project
-
 /**
  * Authors: 
  * Andre, Addario
  * 
  * What we are simulating:
  * The spread of the flu
+ * 
  * What we are attempting to model from the real world:
- * The spread of the sicknes and how fast it spreads depending on if its in season
+ * - The spread of the sickness and how fast it spreads depending on flu season
+ * 
  * What we are leaving out of our model:
- * Death rate
+ * - Death rate (Individuals will stay in the simulation even if infected)
+ * 
  * What elements we have to add:
- * Flu Season on and off button 
- * What parameters we will allow users to "tweak" to adjust the model:
- * Infection chance, flu season, population, Age of population 
+ * - Flu Season toggle 
+ * 
+ * What parameters we will allow users to "tweak":
+ * - Infection chance, flu season, population, age distribution
+ * 
  * In plain language, what our model does:
- * Our model shows the impact and distribution of the flu depending on things like if its flu seaon, age of the person, infection chance,
+ * - Our model shows how flu spreads based on flu season, age, and infection chance.
  */
 
-import { shufflePopulation } from "../../lib/shufflePopulation";
-
-// Default parameters -- any properties you add here
-// will be passed to your disease model when it runs.
 export const defaultSimulationParameters = {
   fluSeason: false, // Flu season toggle
+  immunityChance: 50, // Default immunity chance is 50%
 };
 
 export const createPopulation = (size = 1600, youngRatio = 50) => {
@@ -35,11 +35,14 @@ export const createPopulation = (size = 1600, youngRatio = 50) => {
   for (let i = 0; i < size; i++) {
     population.push({
       id: i,
-      x: (100 * (i % sideSize)) / sideSize, // X-coordinate within 100 units
-      y: (100 * Math.floor(i / sideSize)) / sideSize, // Y-coordinate scaled similarly
+      x: (100 * (i % sideSize)) / sideSize,
+      y: (100 * Math.floor(i / sideSize)) / sideSize,
       infected: false,
-      age: i < youngPopulationCount ? "young" : "old", // Assign age based on the ratio
-      daysInfected: 0, // Track days infected
+      immune: false,
+      recovered: false,
+      daysInfected: 0,
+      reinfected: false,
+      age: i < youngPopulationCount ? "young" : "old",
     });
   }
 
@@ -49,25 +52,29 @@ export const createPopulation = (size = 1600, youngRatio = 50) => {
   return population;
 };
 
-export const updatePopulation = (population, fluSeason) => {
-  let fluSeasonActive = fluSeason;
-
-  // Loop through the population to update infection status
+export const updatePopulation = (population, fluSeason, immunityChance) => {
   for (let p of population) {
     if (p.infected) {
-      p.daysInfected += 1;
-      if (p.daysInfected >= 3) {
-        p.infected = false; // Recover after 3 days
+      p.daysInfected++;
+      if (p.daysInfected >= 5) {
+        p.recovered = true;
+        p.infected = false;
         p.daysInfected = 0;
+
+        if (Math.random() < immunityChance / 100) {
+          p.immune = true;
+        } else {
+          p.infected = true;
+          p.daysInfected = 1;
+          p.reinfected = true;
+        }
       }
     }
 
-    // Nearby individuals infection logic (simple model)
-    if (!p.infected) {
+    if (!p.infected && !p.recovered) {
       for (let other of population) {
         if (other.infected && Math.abs(p.x - other.x) < 10 && Math.abs(p.y - other.y) < 10) {
-          // Nearby people can get infected
-          if (Math.random() < 0.025) { // General infection rate in close proximity
+          if (Math.random() < 0.025) {
             p.infected = true;
             p.newlyInfected = true;
             break;
@@ -76,12 +83,22 @@ export const updatePopulation = (population, fluSeason) => {
       }
     }
 
-    // Reinfection chance (1% for young, 2% for old)
-    if (p.age === "young" && !p.infected && Math.random() < 0.01) {
+    if (!p.reinfected && p.age === "young" && !p.infected && !p.recovered && Math.random() < 0.01) {
       p.infected = true;
     }
-    if (p.age === "old" && !p.infected && Math.random() < 0.02) {
+    if (!p.reinfected && p.age === "old" && !p.infected && !p.recovered && Math.random() < 0.02) {
       p.infected = true;
+    }
+
+    if (p.immune && !p.infected && !p.recovered && Math.random() < 0.01) {
+      p.infected = true;
+      p.daysInfected = 1;
+      p.immune = false;
+      p.reinfected = true;
+    }
+
+    if (p.reinfected && !p.infected && !p.recovered) {
+      p.infected = false;
     }
   }
 
@@ -90,14 +107,20 @@ export const updatePopulation = (population, fluSeason) => {
 
 export const trackedStats = [
   { label: "Total Infected", value: "infected" },
+  { label: "Total Recovered", value: "recovered" },
+  { label: "Total Immune", value: "immune" },
 ];
 
 export const computeStatistics = (population, round) => {
   let infected = 0;
+  let recovered = 0;
+  let immune = 0;
+
   for (let p of population) {
-    if (p.infected) {
-      infected += 1; // Count the infected
-    }
+    if (p.infected) infected++;
+    if (p.recovered) recovered++;
+    if (p.immune) immune++;
   }
-  return { round, infected };
+
+  return { round, infected, recovered, immune };
 };

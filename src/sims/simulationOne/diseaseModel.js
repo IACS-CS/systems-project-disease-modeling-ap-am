@@ -1,3 +1,4 @@
+//AI used through out this project
 import { shufflePopulation } from "../../lib/shufflePopulation";
 
 /* Update this code to simulate a simple disease model! */
