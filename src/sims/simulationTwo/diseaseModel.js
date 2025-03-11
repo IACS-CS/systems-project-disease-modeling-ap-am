@@ -6,7 +6,7 @@
  * - The spread of the flu
  * 
  * What we are attempting to model from the real world:
- * - The spread of the sickness and how fast it spreads depending on flu season
+ * - The spread of sickness and how fast it spreads depending on flu season
  * 
  * What we are leaving out of our model:
  * - Death rate (Individuals will stay in the simulation even if infected)
@@ -21,9 +21,10 @@
  * - Our model shows how flu spreads based on flu season, age, and infection chance.
  */
 
+// Default simulation settings
 export const defaultSimulationParameters = {
   fluSeason: false, // Flu season toggle
-  immunityChance: 50, // Default immunity chance is 50%
+  immunityChance: 50, // Default chance to become immune after recovery (50%)
 };
 
 /**
@@ -35,25 +36,26 @@ export const defaultSimulationParameters = {
 export const createPopulation = (size = 1600, youngRatio = 50) => {
   const population = [];
   const sideSize = Math.sqrt(size);
-  const youngPopulationCount = Math.floor((youngRatio / 100) * size);
-  const oldPopulationCount = size - youngPopulationCount;
+  const youngPopulationCount = Math.floor((youngRatio / 100) * size); // Calculate young population size
+  const oldPopulationCount = size - youngPopulationCount; // Remaining are old individuals
 
+  // Generate individuals
   for (let i = 0; i < size; i++) {
     population.push({
-      id: i,
-      x: (100 * (i % sideSize)) / sideSize,
-      y: (100 * Math.floor(i / sideSize)) / sideSize,
-      infected: false,
-      immune: false,
-      recovered: false,
-      daysInfected: 0,
-      reinfected: false,
-      roundsSinceImmune: 0, // NEW: Tracks how many rounds have passed since immunity
-      age: i < youngPopulationCount ? "young" : "old",
+      id: i, // Unique ID
+      x: (100 * (i % sideSize)) / sideSize, // X coordinate
+      y: (100 * Math.floor(i / sideSize)) / sideSize, // Y coordinate
+      infected: false, // Initially not infected
+      immune: false, // Initially not immune
+      recovered: false, // Initially not recovered
+      daysInfected: 0, // Days infected counter
+      reinfected: false, // Reinfection status
+      roundsSinceImmune: 0, // Tracks how long immunity lasts
+      age: i < youngPopulationCount ? "young" : "old", // Assign age category
     });
   }
 
-  // Infect patient zero (randomly chosen)
+  // Select and infect patient zero (first infected person)
   let patientZero = population[Math.floor(Math.random() * size)];
   patientZero.infected = true;
   return population;
@@ -62,16 +64,18 @@ export const createPopulation = (size = 1600, youngRatio = 50) => {
 /**
  * Updates the population each round.
  * - Infected individuals recover after 5 days.
- * - Recovered individuals have a chance to become immune the next round.
+ * - Recovered individuals have a chance to become immune.
  * - The infection spreads to nearby individuals.
+ * - Immune individuals can get reinfected only after 40 rounds.
  */
 export const updatePopulation = (population, fluSeason, immunityChance) => {
   for (let p of population) {
-    // If the person is infected, increase infection duration
+    
+    // Handle infected individuals
     if (p.infected) {
       p.daysInfected++;
 
-      // After 5 days, the person recovers
+      // Recover after 5 days
       if (p.daysInfected >= 5) {
         p.recovered = true;
         p.infected = false;
@@ -79,29 +83,28 @@ export const updatePopulation = (population, fluSeason, immunityChance) => {
       }
     }
 
-    // If the person is immune, increase the number of rounds since immunity
+    // Track how long an individual has been immune
     if (p.immune) {
       p.roundsSinceImmune++;
     }
 
-    // After a person recovers, they have a chance to become immune in the next round.
+    // Recovered individuals have a chance to become immune
     if (p.recovered && Math.random() < immunityChance / 100) {
       p.immune = true;
-      p.recovered = false; // Remove recovered status since they are now immune
+      p.recovered = false; // Remove recovered status
       p.roundsSinceImmune = 0; // Reset immunity timer
     }
 
-    // Infection spread mechanics: only infect non-infected, non-immune people
+    // Spread infection to nearby people
     if (!p.infected && !p.recovered) {
       for (let other of population) {
         if (
           other.infected &&
-          Math.abs(p.x - other.x) < 10 &&
+          Math.abs(p.x - other.x) < 10 && // Check if they are nearby
           Math.abs(p.y - other.y) < 10
         ) {
-          if (Math.random() < 0.025) {
+          if (Math.random() < 0.025) { // 2.5% chance of infection
             p.infected = true;
-            p.newlyInfected = true;
             break;
           }
         }
@@ -116,23 +119,12 @@ export const updatePopulation = (population, fluSeason, immunityChance) => {
       p.infected = true;
     }
 
-    // NEW: Immune individuals losing immunity and getting reinfected (only after 40 rounds)
-    if (
-      p.immune && 
-      !p.infected && 
-      !p.recovered && 
-      p.roundsSinceImmune >= 40 && 
-      Math.random() < 0.01
-    ) {
+    // Immune individuals can only get reinfected after 40 rounds
+    if (p.immune && p.roundsSinceImmune >= 40 && Math.random() < 0.01) {
       p.infected = true;
       p.daysInfected = 1;
       p.immune = false;
       p.reinfected = true;
-    }
-
-    // If someone was reinfected before but is now healthy, clear reinfection flag
-    if (p.reinfected && !p.infected && !p.recovered) {
-      p.infected = false;
     }
   }
 
