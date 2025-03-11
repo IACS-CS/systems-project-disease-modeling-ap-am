@@ -106,11 +106,11 @@ const Simulation = () => {
   return (
     <div>
       <section className="top">
-        <h1>My Custom Simulation</h1>
+        <h1>Simulation One</h1>
         <p>
-          Edit <code>simulationOne/diseaseModel.js</code> to define how your
-          simulation works. This one should try to introduce *one* complicating
-          feature to the basic model.
+          
+In the first simulation, we added the immunity rate and death rate to make it more realistic. The original one had just the infections which would be incomplete 
+
         </p>
 
         <p>

@@ -86,6 +86,8 @@ const Simulation = () => {
   return (
     <div>
       <h1>Flu Simulation</h1>
+      <h3></h3>The model shows how disease spreads based on age, flu season, and infection rate. You can see how young and old people are affected differently by the infection. Turning flu season on makes the infection spread faster. Tracking infection rates and population helps us understand how the disease grows and recovers as well as how effective immunity becomes.
+
       <p>Population: {population.length} | Infected: {population.filter((p) => p.infected).length}</p> {/* Display population and infected count */}
 
       {/* Simulation Control Buttons */}
