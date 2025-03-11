@@ -20,10 +20,10 @@ const renderPatients = (population) => {
 
   function renderEmoji(p) {
     if (p.infected) return "🤢";  // Infected emoji
+    if (p.immune) return "🦸";  // Immune emoji (this should take priority if the person is immune)
     if (p.recovered) return "🥳";  // Recovered emoji
-    if (p.immune) return "🦸";  // Immune emoji
     return "😀";  // Healthy individual emoji
-  }
+}
 
   return (
     <>
